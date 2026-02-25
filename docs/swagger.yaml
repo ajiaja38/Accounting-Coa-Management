@@ -1,0 +1,698 @@
+basePath: /api/v1
+definitions:
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      role:
+        enum:
+        - admin
+        - user
+        type: string
+      userName:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - userName
+    type: object
+  coa.CreateCOARequest:
+    properties:
+      code:
+        example: 1-1001
+        type: string
+      isActive:
+        example: true
+        type: boolean
+      name:
+        example: Kas dan Setara Kas
+        type: string
+      parentCode:
+        example: 1-1000
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/domain.AccountType'
+        enum:
+        - asset
+        - liability
+        - equity
+        - revenue
+        - expense
+        example: asset
+    required:
+    - code
+    - name
+    - type
+    type: object
+  coa.UpdateCOARequest:
+    properties:
+      isActive:
+        example: true
+        type: boolean
+      name:
+        example: Kas dan Setara Kas
+        type: string
+      parentCode:
+        example: 1-1000
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/domain.AccountType'
+        enum:
+        - asset
+        - liability
+        - equity
+        - revenue
+        - expense
+        example: asset
+    type: object
+  domain.AccountType:
+    enum:
+    - asset
+    - liability
+    - equity
+    - revenue
+    - expense
+    type: string
+    x-enum-varnames:
+    - AccountTypeAsset
+    - AccountTypeLiability
+    - AccountTypeEquity
+    - AccountTypeRevenue
+    - AccountTypeExpense
+  journal.CreateJournalRequest:
+    properties:
+      date:
+        example: "2026-02-24T00:00:00Z"
+        type: string
+      description:
+        example: Pencatatan biaya operasional bulan Februari 2026
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/journal.JournalDetailRequest'
+        minItems: 2
+        type: array
+      reference:
+        example: JRN-2026-0001
+        type: string
+    required:
+    - date
+    - details
+    - reference
+    type: object
+  journal.JournalDetailRequest:
+    properties:
+      coaCode:
+        example: 1-1001
+        type: string
+      credit:
+        example: 0
+        minimum: 0
+        type: number
+      debit:
+        example: 5000000
+        minimum: 0
+        type: number
+      description:
+        example: Pembayaran kas untuk operasional
+        type: string
+    required:
+    - coaCode
+    type: object
+  model.MetaPagination:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      totalData:
+        type: integer
+      totalPage:
+        type: integer
+    type: object
+  model.SwaggerAuthResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  model.SwaggerCOAListResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/model.MetaPagination'
+    type: object
+  model.SwaggerCOAResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  model.SwaggerEmptyResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  model.SwaggerErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+      path:
+        type: string
+    type: object
+  model.SwaggerJournalListResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/model.MetaPagination'
+    type: object
+  model.SwaggerJournalResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@fiber-coa.local
+    name: API Support
+  description: RESTful API for financial accounting management (COA-based) built with
+    Go Fiber.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Financial Accounting API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and sets an HttpOnly JWT cookie
+      parameters:
+      - description: Login payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerAuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      summary: Login user
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      description: Clears the JWT auth cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerEmptyResponse'
+      security:
+      - CookieAuth: []
+      summary: Logout user
+      tags:
+      - Auth
+  /auth/me:
+    get:
+      description: Returns information of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerAuthResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get current authenticated user
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account
+      parameters:
+      - description: Register payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.SwaggerAuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      summary: Register a new user
+      tags:
+      - Auth
+  /coa:
+    get:
+      description: Returns a paginated list of COAs with optional search by code or
+        name
+      parameters:
+      - description: Page number
+        in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - description: Items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        required: true
+        type: integer
+      - description: Search by name or code
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerCOAListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List all Chart of Accounts
+      tags:
+      - COA
+    post:
+      consumes:
+      - application/json
+      description: Creates a new Chart of Account. The code becomes the unique identifier
+        (primary key).
+      parameters:
+      - description: COA payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/coa.CreateCOARequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.SwaggerCOAResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Create a new COA
+      tags:
+      - COA
+  /coa/{code}:
+    delete:
+      description: Soft-deletes a Chart of Account by code
+      parameters:
+      - description: COA Code (e.g. 1-1001)
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerEmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Delete a COA
+      tags:
+      - COA
+    get:
+      description: Returns a single Chart of Account by its code (e.g. "1-1001")
+      parameters:
+      - description: COA Code (e.g. 1-1001)
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerCOAResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get COA by code
+      tags:
+      - COA
+    put:
+      consumes:
+      - application/json
+      description: Updates name, type, parentCode, or isActive of an existing COA
+        by code
+      parameters:
+      - description: COA Code (e.g. 1-1001)
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: COA update payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/coa.UpdateCOARequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerCOAResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Update a COA
+      tags:
+      - COA
+  /journal:
+    get:
+      description: Returns a paginated list of journal entries
+      parameters:
+      - description: Page number
+        in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - description: Items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        required: true
+        type: integer
+      - description: Search by reference or description
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerJournalListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List all journal entries
+      tags:
+      - Journal
+    post:
+      consumes:
+      - application/json
+      description: Creates a journal entry with detail lines. This endpoint uses a
+        DB transaction.
+      parameters:
+      - description: Journal entry payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/journal.CreateJournalRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.SwaggerJournalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Create a new journal entry
+      tags:
+      - Journal
+  /journal/{id}:
+    delete:
+      description: Soft-deletes a journal entry (only draft entries can be deleted)
+      parameters:
+      - description: Journal Entry ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerEmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Delete a draft journal entry
+      tags:
+      - Journal
+    get:
+      description: Returns a single journal entry with all its detail lines
+      parameters:
+      - description: Journal Entry ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerJournalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get journal entry by ID
+      tags:
+      - Journal
+  /journal/{id}/post:
+    put:
+      description: Changes journal status from 'draft' to 'posted'
+      parameters:
+      - description: Journal Entry ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerEmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Post a draft journal entry
+      tags:
+      - Journal
+securityDefinitions:
+  CookieAuth:
+    in: cookie
+    name: auth_token
+    type: apiKey
+swagger: "2.0"
