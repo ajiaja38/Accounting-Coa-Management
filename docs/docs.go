@@ -655,8 +655,8 @@ const docTemplate = `{
                 "summary": "Create a new journal entry",
                 "parameters": [
                     {
-                        "description": "Journal entry payload",
-                        "name": "body",
+                        "description": "Create Journal Request",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -668,7 +668,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.SwaggerJournalResponse"
+                            "$ref": "#/definitions/journal.SwaggerJournalResponse"
                         }
                     },
                     "400": {
@@ -720,7 +720,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SwaggerJournalResponse"
+                            "$ref": "#/definitions/journal.SwaggerJournalResponse"
                         }
                     },
                     "400": {
@@ -839,6 +839,211 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/report/balance-sheet": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Get Balance Sheet report up to a specific date (Financial Position)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get Balance Sheet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD)",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/report.SwaggerBalanceSheetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/report/ledger": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Get General Ledger transactions for a specific COA",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get General Ledger",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "COA Code",
+                        "name": "coaCode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start Date (YYYY-MM-DD)",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD)",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/report.SwaggerLedgerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/report/profit-loss": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Get Profit \u0026 Loss report for a specific period (Income Statement)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get Profit \u0026 Loss",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start Date (YYYY-MM-DD)",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD)",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/report.SwaggerProfitLossResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/report/trial-balance": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Get Trial Balance report for a specific period",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get Trial Balance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start Date (YYYY-MM-DD)",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date (YYYY-MM-DD)",
+                        "name": "endDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/report.SwaggerTrialBalanceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.SwaggerErrorResponse"
                         }
@@ -990,7 +1195,7 @@ const docTemplate = `{
             "properties": {
                 "description": {
                     "type": "string",
-                    "example": "Pencatatan biaya operasional bulan Februari 2026"
+                    "example": "Pembayaran gaji bulan Februari"
                 },
                 "details": {
                     "type": "array",
@@ -1009,7 +1214,7 @@ const docTemplate = `{
             "properties": {
                 "coaCode": {
                     "type": "string",
-                    "example": "1-1001"
+                    "example": "5-1001"
                 },
                 "credit": {
                     "type": "number",
@@ -1023,7 +1228,73 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string",
-                    "example": "Pembayaran kas untuk operasional"
+                    "example": "Pembayaran gaji bulan Februari"
+                }
+            }
+        },
+        "journal.JournalDetailResponse": {
+            "type": "object",
+            "properties": {
+                "coaCode": {
+                    "type": "string"
+                },
+                "coaName": {
+                    "type": "string"
+                },
+                "credit": {
+                    "type": "number"
+                },
+                "debit": {
+                    "type": "number"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "journal.JournalDetailedResponse": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/journal.JournalDetailResponse"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "journal.SwaggerJournalResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/journal.JournalDetailedResponse"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -1123,15 +1394,211 @@ const docTemplate = `{
                 }
             }
         },
-        "model.SwaggerJournalResponse": {
+        "report.AccountBalanceRow": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "description": "Net balance for PnL/BalanceSheet",
+                    "type": "number"
+                },
+                "coaCode": {
+                    "type": "string"
+                },
+                "coaName": {
+                    "type": "string"
+                },
+                "credit": {
+                    "type": "number"
+                },
+                "debit": {
+                    "type": "number"
+                }
+            }
+        },
+        "report.BalanceSheetResponse": {
+            "type": "object",
+            "properties": {
+                "assets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.AccountBalanceRow"
+                    }
+                },
+                "equities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.AccountBalanceRow"
+                    }
+                },
+                "isBalanced": {
+                    "type": "boolean"
+                },
+                "liabilities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.AccountBalanceRow"
+                    }
+                },
+                "totalAsset": {
+                    "type": "number"
+                },
+                "totalEquity": {
+                    "type": "number"
+                },
+                "totalLiability": {
+                    "type": "number"
+                },
+                "totalLiabilityAndEquity": {
+                    "type": "number"
+                }
+            }
+        },
+        "report.LedgerResponse": {
+            "type": "object",
+            "properties": {
+                "closingBalance": {
+                    "type": "number"
+                },
+                "coaCode": {
+                    "type": "string"
+                },
+                "coaName": {
+                    "type": "string"
+                },
+                "openingBalance": {
+                    "type": "number"
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.TransactionRow"
+                    }
+                }
+            }
+        },
+        "report.ProfitLossResponse": {
+            "type": "object",
+            "properties": {
+                "expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.AccountBalanceRow"
+                    }
+                },
+                "netProfit": {
+                    "type": "number"
+                },
+                "revenues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.AccountBalanceRow"
+                    }
+                },
+                "totalExpense": {
+                    "type": "number"
+                },
+                "totalRevenue": {
+                    "type": "number"
+                }
+            }
+        },
+        "report.SwaggerBalanceSheetResponse": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
-                "data": {},
+                "data": {
+                    "$ref": "#/definitions/report.BalanceSheetResponse"
+                },
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "report.SwaggerLedgerResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/report.LedgerResponse"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.SwaggerProfitLossResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/report.ProfitLossResponse"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.SwaggerTrialBalanceResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/report.TrialBalanceResponse"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.TransactionRow": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "description": "calculated running balance",
+                    "type": "number"
+                },
+                "credit": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "debit": {
+                    "type": "number"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "reference": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.TrialBalanceResponse": {
+            "type": "object",
+            "properties": {
+                "isBalanced": {
+                    "type": "boolean"
+                },
+                "rows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.AccountBalanceRow"
+                    }
+                },
+                "totalCredit": {
+                    "type": "number"
+                },
+                "totalDebit": {
+                    "type": "number"
                 }
             }
         }

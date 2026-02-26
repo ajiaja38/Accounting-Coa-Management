@@ -10,6 +10,7 @@ import (
 	"fiber.com/session-api/internal/coa"
 	"fiber.com/session-api/internal/domain"
 	"fiber.com/session-api/internal/journal"
+	"fiber.com/session-api/internal/report"
 	"fiber.com/session-api/pkg/middleware"
 
 	"github.com/gofiber/fiber/v2"
@@ -87,6 +88,12 @@ func main() {
 	journalService := journal.NewService(journalRepo)
 	journalHandler := journal.NewHandler(journalService)
 	journal.RegisterRoutes(api, journalHandler, db)
+
+	// Report routes
+	reportRepo := report.NewRepository(db)
+	reportService := report.NewService(reportRepo, coaRepo)
+	reportHandler := report.NewHandler(reportService)
+	report.RegisterRoutes(api, reportHandler)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{

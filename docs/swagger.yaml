@@ -99,7 +99,7 @@ definitions:
   journal.CreateJournalRequest:
     properties:
       description:
-        example: Pencatatan biaya operasional bulan Februari 2026
+        example: Pembayaran gaji bulan Februari
         type: string
       details:
         items:
@@ -112,7 +112,7 @@ definitions:
   journal.JournalDetailRequest:
     properties:
       coaCode:
-        example: 1-1001
+        example: 5-1001
         type: string
       credit:
         example: 0
@@ -123,10 +123,53 @@ definitions:
         minimum: 0
         type: number
       description:
-        example: Pembayaran kas untuk operasional
+        example: Pembayaran gaji bulan Februari
         type: string
     required:
     - coaCode
+    type: object
+  journal.JournalDetailResponse:
+    properties:
+      coaCode:
+        type: string
+      coaName:
+        type: string
+      credit:
+        type: number
+      debit:
+        type: number
+      description:
+        type: string
+      id:
+        type: string
+    type: object
+  journal.JournalDetailedResponse:
+    properties:
+      createdBy:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/journal.JournalDetailResponse'
+        type: array
+      id:
+        type: string
+      reference:
+        type: string
+      status:
+        type: string
+    type: object
+  journal.SwaggerJournalResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/journal.JournalDetailedResponse'
+      message:
+        type: string
     type: object
   model.MetaPagination:
     properties:
@@ -191,13 +234,141 @@ definitions:
       meta:
         $ref: '#/definitions/model.MetaPagination'
     type: object
-  model.SwaggerJournalResponse:
+  report.AccountBalanceRow:
+    properties:
+      balance:
+        description: Net balance for PnL/BalanceSheet
+        type: number
+      coaCode:
+        type: string
+      coaName:
+        type: string
+      credit:
+        type: number
+      debit:
+        type: number
+    type: object
+  report.BalanceSheetResponse:
+    properties:
+      assets:
+        items:
+          $ref: '#/definitions/report.AccountBalanceRow'
+        type: array
+      equities:
+        items:
+          $ref: '#/definitions/report.AccountBalanceRow'
+        type: array
+      isBalanced:
+        type: boolean
+      liabilities:
+        items:
+          $ref: '#/definitions/report.AccountBalanceRow'
+        type: array
+      totalAsset:
+        type: number
+      totalEquity:
+        type: number
+      totalLiability:
+        type: number
+      totalLiabilityAndEquity:
+        type: number
+    type: object
+  report.LedgerResponse:
+    properties:
+      closingBalance:
+        type: number
+      coaCode:
+        type: string
+      coaName:
+        type: string
+      openingBalance:
+        type: number
+      transactions:
+        items:
+          $ref: '#/definitions/report.TransactionRow'
+        type: array
+    type: object
+  report.ProfitLossResponse:
+    properties:
+      expenses:
+        items:
+          $ref: '#/definitions/report.AccountBalanceRow'
+        type: array
+      netProfit:
+        type: number
+      revenues:
+        items:
+          $ref: '#/definitions/report.AccountBalanceRow'
+        type: array
+      totalExpense:
+        type: number
+      totalRevenue:
+        type: number
+    type: object
+  report.SwaggerBalanceSheetResponse:
     properties:
       code:
         type: integer
-      data: {}
+      data:
+        $ref: '#/definitions/report.BalanceSheetResponse'
       message:
         type: string
+    type: object
+  report.SwaggerLedgerResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/report.LedgerResponse'
+      message:
+        type: string
+    type: object
+  report.SwaggerProfitLossResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/report.ProfitLossResponse'
+      message:
+        type: string
+    type: object
+  report.SwaggerTrialBalanceResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/report.TrialBalanceResponse'
+      message:
+        type: string
+    type: object
+  report.TransactionRow:
+    properties:
+      balance:
+        description: calculated running balance
+        type: number
+      credit:
+        type: number
+      date:
+        type: string
+      debit:
+        type: number
+      description:
+        type: string
+      reference:
+        type: string
+    type: object
+  report.TrialBalanceResponse:
+    properties:
+      isBalanced:
+        type: boolean
+      rows:
+        items:
+          $ref: '#/definitions/report.AccountBalanceRow'
+        type: array
+      totalCredit:
+        type: number
+      totalDebit:
+        type: number
     type: object
 host: localhost:8080
 info:
@@ -619,9 +790,9 @@ paths:
       description: Creates a journal entry with detail lines. This endpoint uses a
         DB transaction.
       parameters:
-      - description: Journal entry payload
+      - description: Create Journal Request
         in: body
-        name: body
+        name: request
         required: true
         schema:
           $ref: '#/definitions/journal.CreateJournalRequest'
@@ -631,7 +802,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.SwaggerJournalResponse'
+            $ref: '#/definitions/journal.SwaggerJournalResponse'
         "400":
           description: Bad Request
           schema:
@@ -696,7 +867,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SwaggerJournalResponse'
+            $ref: '#/definitions/journal.SwaggerJournalResponse'
         "400":
           description: Bad Request
           schema:
@@ -747,6 +918,135 @@ paths:
       summary: Post a draft journal entry
       tags:
       - Journal
+  /report/balance-sheet:
+    get:
+      description: Get Balance Sheet report up to a specific date (Financial Position)
+      parameters:
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/report.SwaggerBalanceSheetResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get Balance Sheet
+      tags:
+      - Report
+  /report/ledger:
+    get:
+      description: Get General Ledger transactions for a specific COA
+      parameters:
+      - description: COA Code
+        in: query
+        name: coaCode
+        required: true
+        type: string
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: startDate
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/report.SwaggerLedgerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get General Ledger
+      tags:
+      - Report
+  /report/profit-loss:
+    get:
+      description: Get Profit & Loss report for a specific period (Income Statement)
+      parameters:
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: startDate
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/report.SwaggerProfitLossResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get Profit & Loss
+      tags:
+      - Report
+  /report/trial-balance:
+    get:
+      description: Get Trial Balance report for a specific period
+      parameters:
+      - description: Start Date (YYYY-MM-DD)
+        in: query
+        name: startDate
+        type: string
+      - description: End Date (YYYY-MM-DD)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/report.SwaggerTrialBalanceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get Trial Balance
+      tags:
+      - Report
 securityDefinitions:
   CookieAuth:
     in: cookie

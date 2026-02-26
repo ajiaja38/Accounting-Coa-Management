@@ -58,7 +58,7 @@ func (h *Handler) GetAll(c *fiber.Ctx) error {
 // @Tags         Journal
 // @Produce      json
 // @Param        id   path  string  true  "Journal Entry ID (UUID)"
-// @Success      200  {object}  model.SwaggerJournalResponse
+// @Success      200  {object}  SwaggerJournalResponse
 // @Failure      400  {object}  model.SwaggerErrorResponse
 // @Failure      401  {object}  model.SwaggerErrorResponse
 // @Failure      404  {object}  model.SwaggerErrorResponse
@@ -84,8 +84,8 @@ func (h *Handler) GetByID(c *fiber.Ctx) error {
 // @Tags         Journal
 // @Accept       json
 // @Produce      json
-// @Param        body body CreateJournalRequest true "Journal entry payload"
-// @Success      201  {object}  model.SwaggerJournalResponse
+// @Param        request body journal.CreateJournalRequest true "Create Journal Request"
+// @Success      201  {object}  SwaggerJournalResponse
 // @Failure      400  {object}  model.SwaggerErrorResponse
 // @Failure      401  {object}  model.SwaggerErrorResponse
 // @Failure      500  {object}  model.SwaggerErrorResponse

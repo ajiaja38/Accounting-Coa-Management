@@ -5,14 +5,14 @@ import (
 )
 
 type JournalDetailRequest struct {
-	CoaCode     string  `json:"coaCode"     validate:"required"  example:"1-1001"`
+	CoaCode     string  `json:"coaCode"     validate:"required"  example:"5-1001"`
 	Debit       float64 `json:"debit"       validate:"min=0"     example:"5000000"`
 	Credit      float64 `json:"credit"      validate:"min=0"     example:"0"`
-	Description string  `json:"description" validate:"omitempty" example:"Pembayaran kas untuk operasional"`
+	Description string  `json:"description" validate:"omitempty" example:"Pembayaran gaji bulan Februari"`
 }
 
 type CreateJournalRequest struct {
-	Description string                 `json:"description" validate:"omitempty" example:"Pencatatan biaya operasional bulan Februari 2026"`
+	Description string                 `json:"description" validate:"omitempty" example:"Pembayaran gaji bulan Februari"`
 	Details     []JournalDetailRequest `json:"details"     validate:"required,min=2,dive"`
 }
 
@@ -44,4 +44,12 @@ type JournalDetailedResponse struct {
 	Status      string                  `json:"status"`
 	CreatedBy   string                  `json:"createdBy"`
 	Details     []JournalDetailResponse `json:"details"`
+}
+
+// Swagger Responses
+
+type SwaggerJournalResponse struct {
+	Code    int                     `json:"code"`
+	Message string                  `json:"message"`
+	Data    JournalDetailedResponse `json:"data"`
 }

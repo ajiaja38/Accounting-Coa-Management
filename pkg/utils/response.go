@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fiber.com/session-api/pkg/model"
-
 	"github.com/gofiber/fiber/v2"
 )
 

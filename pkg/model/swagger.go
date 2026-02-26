@@ -19,12 +19,6 @@ type SwaggerCOAListResponse struct {
 	Meta    *MetaPagination `json:"meta,omitempty"`
 }
 
-type SwaggerJournalResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    any    `json:"data,omitempty"`
-}
-
 type SwaggerJournalListResponse struct {
 	Code    int             `json:"code"`
 	Message string          `json:"message"`
