@@ -11,6 +11,7 @@ func RegisterRoutes(router fiber.Router, handler *Handler) {
 	coaRoutes.Use(middleware.AuthMiddleware())
 
 	coaRoutes.Get("/", handler.GetAll)
+	coaRoutes.Get("/no-paginate", handler.GetAllNoPaginate)
 	coaRoutes.Get("/with-children", handler.GetAllWithChildren)
 	coaRoutes.Get("/:code", handler.GetByCode)
 	coaRoutes.Post("/", handler.Create)

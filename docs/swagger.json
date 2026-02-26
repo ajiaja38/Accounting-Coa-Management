@@ -300,6 +300,43 @@
                 }
             }
         },
+        "/coa/no-paginate": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns a list of COAs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "COA"
+                ],
+                "summary": "List all Chart of Accounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerCOAListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/coa/with-children": {
             "get": {
                 "security": [

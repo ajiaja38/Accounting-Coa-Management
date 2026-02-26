@@ -50,6 +50,25 @@ func (h *Handler) GetAll(c *fiber.Ctx) error {
 	return utils.SuccessResponsePaginate(c, fiber.StatusOK, "Success get all COA", accounts, meta)
 }
 
+// GetAll godoc
+// @Summary      List all Chart of Accounts
+// @Description  Returns a list of COAs
+// @Tags         COA
+// @Produce      json
+// @Success      200  {object}  model.SwaggerCOAListResponse
+// @Failure      401  {object}  model.SwaggerErrorResponse
+// @Failure      500  {object}  model.SwaggerErrorResponse
+// @Security     CookieAuth
+// @Router       /coa/no-paginate [get]
+func (h *Handler) GetAllNoPaginate(c *fiber.Ctx) error {
+	accounts, err := h.service.GetAllNoPagination()
+	if err != nil {
+		return err
+	}
+
+	return utils.SuccessResponse(c, fiber.StatusOK, "Success get all COA", accounts)
+}
+
 // GetAllWithChildren godoc
 // @Summary      List all Chart of Accounts with children
 // @Description  Returns a paginated list of COAs with optional search by code or name or type

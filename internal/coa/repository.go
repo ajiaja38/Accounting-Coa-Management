@@ -10,6 +10,7 @@ import (
 
 type Repository interface {
 	FindAll(req *model.PaginationRequest) ([]domain.ChartOfAccount, int64, error)
+	FindAllNoPagination() ([]domain.ChartOfAccount, error)
 	FindAllWithChildren(req *model.PaginationRequest) ([]CoaReqursiveResponse, int64, error)
 	FindByCode(code string) (*domain.ChartOfAccount, error)
 	Create(coa *domain.ChartOfAccount) error
@@ -48,6 +49,30 @@ func (r *repository) FindAll(req *model.PaginationRequest) ([]domain.ChartOfAcco
 	}
 
 	return accounts, total, nil
+}
+
+func (r *repository) FindAllNoPagination() ([]domain.ChartOfAccount, error) {
+	var accounts []domain.ChartOfAccount
+
+	dataQuery := `
+		SELECT
+			code,
+			name,
+			type,
+			parent_code,
+			is_active,
+			created_at,
+			updated_at
+		FROM chart_of_accounts
+		WHERE deleted_at IS NULL
+		ORDER BY code ASC
+	`
+
+	if err := r.db.Raw(dataQuery).Scan(&accounts).Error; err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
 }
 
 func (r *repository) FindAllWithChildren(req *model.PaginationRequest) ([]CoaReqursiveResponse, int64, error) {

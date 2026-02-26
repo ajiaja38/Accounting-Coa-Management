@@ -507,6 +507,29 @@ paths:
       summary: Update a COA
       tags:
       - COA
+  /coa/no-paginate:
+    get:
+      description: Returns a list of COAs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerCOAListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List all Chart of Accounts
+      tags:
+      - COA
   /coa/with-children:
     get:
       description: Returns a paginated list of COAs with optional search by code or

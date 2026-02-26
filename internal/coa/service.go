@@ -11,6 +11,7 @@ import (
 
 type Service interface {
 	GetAll(req *model.PaginationRequest) ([]COAResponse, *model.MetaPagination, error)
+	GetAllNoPagination() ([]COAResponse, error)
 	GetAllWithChildren(req *model.PaginationRequest) ([]CoaReqursiveResponse, *model.MetaPagination, error)
 	GetByCode(code string) (*COAResponse, error)
 	Create(req *CreateCOARequest) (*COAResponse, error)
@@ -56,6 +57,21 @@ func (s *service) GetAll(req *model.PaginationRequest) ([]COAResponse, *model.Me
 	}
 
 	return responses, meta, nil
+}
+
+func (s *service) GetAllNoPagination() ([]COAResponse, error) {
+	coa, err := s.repo.FindAllNoPagination()
+
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	responses := make([]COAResponse, len(coa))
+	for i, a := range coa {
+		responses[i] = *toResponse(&a)
+	}
+
+	return responses, nil
 }
 
 func (s *service) GetAllWithChildren(req *model.PaginationRequest) ([]CoaReqursiveResponse, *model.MetaPagination, error) {
