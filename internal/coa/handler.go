@@ -50,6 +50,39 @@ func (h *Handler) GetAll(c *fiber.Ctx) error {
 	return utils.SuccessResponsePaginate(c, fiber.StatusOK, "Success get all COA", accounts, meta)
 }
 
+// GetAllWithChildren godoc
+// @Summary      List all Chart of Accounts with children
+// @Description  Returns a paginated list of COAs with optional search by code or name or type
+// @Tags         COA
+// @Produce      json
+// @Param        page   query  int     true  "Page number"    minimum(1)
+// @Param        limit  query  int     true  "Items per page" minimum(1) maximum(100)
+// @Param        search query  string  false "Search by name or code"
+// @Success      200  {object}  model.SwaggerCOAListResponse
+// @Failure      401  {object}  model.SwaggerErrorResponse
+// @Failure      500  {object}  model.SwaggerErrorResponse
+// @Security     CookieAuth
+// @Router       /coa/with-children [get]
+func (h *Handler) GetAllWithChildren(c *fiber.Ctx) error {
+	var req model.PaginationRequest
+	if err := c.QueryParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid query parameters")
+	}
+	if req.Page < 1 {
+		req.Page = 1
+	}
+	if req.Limit < 1 || req.Limit > 100 {
+		req.Limit = 10
+	}
+
+	accounts, meta, err := h.service.GetAllWithChildren(&req)
+	if err != nil {
+		return err
+	}
+
+	return utils.SuccessResponsePaginate(c, fiber.StatusOK, "Success get all COA", accounts, meta)
+}
+
 // GetByCode godoc
 // @Summary      Get COA by code
 // @Description  Returns a single Chart of Account by its code (e.g. "1-1001")

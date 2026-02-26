@@ -10,6 +10,7 @@ import (
 
 type Repository interface {
 	FindAll(req *model.PaginationRequest) ([]domain.ChartOfAccount, int64, error)
+	FindAllWithChildren(req *model.PaginationRequest) ([]CoaReqursiveResponse, int64, error)
 	FindByCode(code string) (*domain.ChartOfAccount, error)
 	Create(coa *domain.ChartOfAccount) error
 	Update(coa *domain.ChartOfAccount) error
@@ -43,6 +44,76 @@ func (r *repository) FindAll(req *model.PaginationRequest) ([]domain.ChartOfAcco
 		LIMIT ? OFFSET ?`
 
 	if err := r.db.Raw(dataQuery, search, search, req.Limit, offset).Scan(&accounts).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return accounts, total, nil
+}
+
+func (r *repository) FindAllWithChildren(req *model.PaginationRequest) ([]CoaReqursiveResponse, int64, error) {
+	var accounts []CoaReqursiveResponse
+	var total int64
+	offset := (req.Page - 1) * req.Limit
+	search := "%" + req.Search + "%"
+	var query string
+	var args []any
+
+	if req.Search != "" {
+		query = `
+            and (
+                coa."name" ilike ?
+                OR coa."type" ilike ?
+            )
+        `
+		args = append(args, search, search)
+	}
+
+	countQuery := `
+        SELECT COUNT(*)
+        from chart_of_accounts coa
+        WHERE coa.parent_code IS NULL
+        AND coa.is_active = true
+        ` + query + `
+    `
+
+	if err := r.db.Raw(countQuery, args...).Scan(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	dataQuery := `
+        SELECT
+            coa.code,
+            coa."name",
+            coa."type",
+            COALESCE(
+                JSON_AGG(
+                    JSON_BUILD_OBJECT(
+                        'code', coa2.code,
+                        'name', coa2."name",
+                        'type', coa2."type",
+                        'parentCode', coa2.parent_code
+                    )
+                ) FILTER (WHERE coa2.code is not null),
+                '[]'::json
+            ) as childs
+        FROM chart_of_accounts coa
+        LEFT JOIN chart_of_accounts coa2
+            on coa2.parent_code = coa.code
+            and coa2.is_active = true
+        WHERE coa.parent_code is null
+        AND coa.is_active = true
+        ` + query + `
+        GROUP BY
+            coa.code,
+            coa."name",
+            coa."type"
+        ORDER BY coa.created_at asc
+        LIMIT ?
+        OFFSET ?
+	`
+	args = append(args, req.Limit, offset)
+
+	if err := r.db.Raw(dataQuery, args...).Scan(&accounts).Error; err != nil {
 		return nil, 0, err
 	}
 

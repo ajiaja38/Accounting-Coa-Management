@@ -306,6 +306,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/coa/with-children": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns a paginated list of COAs with optional search by code or name or type",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "COA"
+                ],
+                "summary": "List all Chart of Accounts with children",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by name or code",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerCOAListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/coa/{code}": {
             "get": {
                 "security": [
@@ -886,15 +948,9 @@ const docTemplate = `{
         "journal.CreateJournalRequest": {
             "type": "object",
             "required": [
-                "date",
-                "details",
-                "reference"
+                "details"
             ],
             "properties": {
-                "date": {
-                    "type": "string",
-                    "example": "2026-02-24T00:00:00Z"
-                },
                 "description": {
                     "type": "string",
                     "example": "Pencatatan biaya operasional bulan Februari 2026"
@@ -905,10 +961,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/journal.JournalDetailRequest"
                     }
-                },
-                "reference": {
-                    "type": "string",
-                    "example": "JRN-2026-0001"
                 }
             }
         },

@@ -98,9 +98,6 @@ definitions:
     - AccountTypeExpense
   journal.CreateJournalRequest:
     properties:
-      date:
-        example: "2026-02-24T00:00:00Z"
-        type: string
       description:
         example: Pencatatan biaya operasional bulan Februari 2026
         type: string
@@ -109,13 +106,8 @@ definitions:
           $ref: '#/definitions/journal.JournalDetailRequest'
         minItems: 2
         type: array
-      reference:
-        example: JRN-2026-0001
-        type: string
     required:
-    - date
     - details
-    - reference
     type: object
   journal.JournalDetailRequest:
     properties:
@@ -513,6 +505,48 @@ paths:
       security:
       - CookieAuth: []
       summary: Update a COA
+      tags:
+      - COA
+  /coa/with-children:
+    get:
+      description: Returns a paginated list of COAs with optional search by code or
+        name or type
+      parameters:
+      - description: Page number
+        in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - description: Items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        required: true
+        type: integer
+      - description: Search by name or code
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SwaggerCOAListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.SwaggerErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List all Chart of Accounts with children
       tags:
       - COA
   /journal:

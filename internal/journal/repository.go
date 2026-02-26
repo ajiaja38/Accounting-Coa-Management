@@ -50,7 +50,12 @@ func (r *repository) FindAll(req *model.PaginationRequest) ([]JournalListRespons
 		FROM journal_entries je
 		WHERE ` + jeWhere
 
-	if err := r.db.Raw(countQuery, search, search).Scan(&total).Error; err != nil {
+	var args []interface{}
+	if req.Search != "" {
+		args = append(args, search, search)
+	}
+
+	if err := r.db.Raw(countQuery, args...).Scan(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -81,8 +86,10 @@ func (r *repository) FindAll(req *model.PaginationRequest) ([]JournalListRespons
 			je.created_at DESC
 		LIMIT ? OFFSET ?`
 
+	argsWithLimit := append(args, req.Limit, offset)
+
 	var rows []JournalListResponse
-	if err := r.db.Raw(dataQuery, search, search, req.Limit, offset).Scan(&rows).Error; err != nil {
+	if err := r.db.Raw(dataQuery, argsWithLimit...).Scan(&rows).Error; err != nil {
 		return nil, 0, err
 	}
 

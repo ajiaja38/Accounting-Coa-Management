@@ -2,6 +2,7 @@ package coa
 
 import (
 	"fiber.com/session-api/internal/domain"
+	"gorm.io/datatypes"
 )
 
 type CreateCOARequest struct {
@@ -23,6 +24,13 @@ type COAResponse struct {
 	Code       string             `json:"code"`
 	Name       string             `json:"name"`
 	Type       domain.AccountType `json:"type"`
-	ParentCode *string            `json:"parentCode,omitempty"`
+	ParentCode *string            `json:"parentCode"`
 	IsActive   bool               `json:"isActive"`
+}
+
+type CoaReqursiveResponse struct {
+	Code   string         `json:"code"`
+	Name   string         `json:"name"`
+	Type   string         `json:"type"`
+	Childs datatypes.JSON `json:"childs"`
 }

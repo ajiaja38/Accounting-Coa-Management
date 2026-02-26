@@ -12,8 +12,6 @@ type JournalDetailRequest struct {
 }
 
 type CreateJournalRequest struct {
-	Date        time.Time              `json:"date"        validate:"required"  example:"2026-02-24T00:00:00Z"`
-	Reference   string                 `json:"reference"   validate:"required"  example:"JRN-2026-0001"`
 	Description string                 `json:"description" validate:"omitempty" example:"Pencatatan biaya operasional bulan Februari 2026"`
 	Details     []JournalDetailRequest `json:"details"     validate:"required,min=2,dive"`
 }

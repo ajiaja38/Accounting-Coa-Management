@@ -1,7 +1,10 @@
 package journal
 
 import (
+	"fmt"
 	"math"
+	"strings"
+	"time"
 
 	"fiber.com/session-api/internal/domain"
 	"fiber.com/session-api/pkg/model"
@@ -80,10 +83,15 @@ func (s *service) Create(req *CreateJournalRequest, createdBy uuid.UUID, tx *gor
 	txRepo := NewRepository(tx)
 
 	entryID := uuid.New()
+
+	now := time.Now()
+	refSuffix := strings.ToUpper(uuid.New().String()[0:4])
+	reference := fmt.Sprintf("JRN-%s-%s", now.Format("20060102"), refSuffix)
+
 	entry := &domain.JournalEntry{
 		ID:          entryID,
-		Date:        req.Date,
-		Reference:   req.Reference,
+		Date:        now,
+		Reference:   reference,
 		Description: req.Description,
 		Status:      domain.JournalStatusDraft,
 		CreatedBy:   createdBy,
@@ -104,9 +112,34 @@ func (s *service) Create(req *CreateJournalRequest, createdBy uuid.UUID, tx *gor
 		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	result, err := s.GetByID(entryID)
+	entryResult, detailsResult, err := txRepo.FindByID(entryID)
 	if err != nil {
-		return nil, err
+		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	if entryResult == nil {
+		return nil, fiber.NewError(fiber.StatusNotFound, "Journal entry not found (transaction issue)")
+	}
+
+	detailResponses := make([]JournalDetailResponse, len(detailsResult))
+	for i, d := range detailsResult {
+		detailResponses[i] = JournalDetailResponse{
+			ID:          d.ID,
+			CoaCode:     d.CoaCode,
+			CoaName:     d.CoaName,
+			Debit:       d.Debit,
+			Credit:      d.Credit,
+			Description: d.Description,
+		}
+	}
+
+	result := &JournalDetailedResponse{
+		ID:          entryResult.ID.String(),
+		Date:        entryResult.Date,
+		Reference:   entryResult.Reference,
+		Description: entryResult.Description,
+		Status:      string(entryResult.Status),
+		CreatedBy:   entryResult.CreatedBy.String(),
+		Details:     detailResponses,
 	}
 
 	return result, nil
