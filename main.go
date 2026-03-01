@@ -12,6 +12,7 @@ import (
 	"fiber.com/session-api/internal/journal"
 	"fiber.com/session-api/internal/report"
 	"fiber.com/session-api/pkg/middleware"
+	"fiber.com/session-api/pkg/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -96,10 +97,7 @@ func main() {
 	report.RegisterRoutes(api, reportHandler)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"status":  "ok",
-			"message": "Financial Accounting API is running on Fiber",
-		})
+		return c.JSON(utils.SuccessResponse[any](c, fiber.StatusOK, "Hello Accounting COA managenment from Fiber", nil))
 	})
 
 	addr := fmt.Sprintf(":%s", config.AppConfig.Port)
